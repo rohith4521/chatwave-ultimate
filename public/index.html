@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatWave Ultimate — Real-Time Chat</title>
+  <meta name="description" content="ChatWave Ultimate — A premium real-time chat app with reactions, replies, image sharing and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       LOGIN OVERLAY
+       ═══════════════════════════════════════════════════════ -->
+  <div id="login-overlay" class="login-overlay">
+    <canvas id="particle-canvas"></canvas>
+    <div class="login-card">
+      <div class="login-logo">
+        <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="14" fill="url(#lg)"/><path d="M14 17C14 15.3431 15.3431 14 17 14H31C32.6569 14 34 15.3431 34 17V27C34 28.6569 32.6569 30 31 30H26L21 35V30H17C15.3431 30 14 28.6569 14 27V17Z" fill="white" fill-opacity="0.95"/><circle cx="21" cy="22" r="1.5" fill="#6C63FF"/><circle cx="27" cy="22" r="1.5" fill="#6C63FF"/><defs><linearGradient id="lg" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#6C63FF"/><stop offset="1" stop-color="#3B82F6"/></linearGradient></defs></svg>
+      </div>
+      <h1 class="login-title">ChatWave</h1>
+      <p class="login-subtitle">The ultimate chat experience</p>
+      <form id="login-form" autocomplete="off">
+        <div class="input-group">
+          <input id="username-input" type="text" placeholder="Enter your name…" maxlength="30" required autofocus />
+        </div>
+        <button type="submit" class="btn-primary" id="join-btn">
+          <span>Join Chat</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CHAT APPLICATION
+       ═══════════════════════════════════════════════════════ -->
+  <div id="chat-app" class="chat-app hidden">
+
+    <!-- ── Sidebar ──────────────────────────────────────── -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <svg viewBox="0 0 48 48" width="28" height="28" fill="none"><rect width="48" height="48" rx="14" fill="url(#sb)"/><path d="M14 17C14 15.3431 15.3431 14 17 14H31C32.6569 14 34 15.3431 34 17V27C34 28.6569 32.6569 30 31 30H26L21 35V30H17C15.3431 30 14 28.6569 14 27V17Z" fill="white" fill-opacity="0.95"/><circle cx="21" cy="22" r="1.5" fill="#6C63FF"/><circle cx="27" cy="22" r="1.5" fill="#6C63FF"/><defs><linearGradient id="sb" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#6C63FF"/><stop offset="1" stop-color="#3B82F6"/></linearGradient></defs></svg>
+          <span>ChatWave</span>
+        </div>
+        <div class="sidebar-header-actions">
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle theme" title="Toggle theme">
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button id="sidebar-close" class="sidebar-close" aria-label="Close sidebar">✕</button>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="sidebar-search">
+        <div class="search-input-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="search-input" type="text" placeholder="Search messages…" />
+        </div>
+        <div id="search-results" class="search-results hidden"></div>
+      </div>
+
+      <!-- Global Chat channel -->
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Channels</h3>
+        <ul class="channel-list">
+          <li id="channel-global" class="channel-item active" data-channel="global">
+            <div class="channel-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <span>Global Chat</span>
+            <span id="unread-global" class="unread-badge hidden">0</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Online users -->
+      <div class="sidebar-section sidebar-section-users">
+        <h3 class="sidebar-section-title">
+          <span class="pulse-dot"></span>
+          Online — <span id="online-count">0</span>
+        </h3>
+        <ul id="user-list" class="user-list"></ul>
+      </div>
+
+      <!-- User profile footer -->
+      <div id="user-profile" class="sidebar-profile hidden">
+        <div id="profile-avatar" class="profile-avatar"></div>
+        <div class="profile-info">
+          <span id="profile-name" class="profile-name"></span>
+          <span class="profile-status">Online</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- ── Main Chat Area ───────────────────────────────── -->
+    <main class="chat-main">
+      <!-- Top Bar -->
+      <header class="chat-header">
+        <button id="menu-btn" class="menu-btn" aria-label="Open sidebar">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="chat-header-info">
+          <h2 id="chat-title">Global Chat</h2>
+          <p id="typing-indicator" class="typing-indicator"></p>
+        </div>
+        <div class="header-badge">
+          <span class="pulse-dot"></span>
+          <span id="header-online-count">0</span>
+        </div>
+      </header>
+
+      <!-- Welcome / empty state -->
+      <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-content">
+          <div class="welcome-icon">
+            <svg viewBox="0 0 80 80" fill="none"><rect width="80" height="80" rx="24" fill="url(#wg)" opacity="0.15"/><path d="M22 28C22 25.2386 24.2386 23 27 23H53C55.7614 23 58 25.2386 58 28V44C58 46.7614 55.7614 49 53 49H44L36 57V49H27C24.2386 49 22 46.7614 22 44V28Z" fill="url(#wg)"/><circle cx="34" cy="36" r="2.5" fill="white"/><circle cx="42" cy="36" r="2.5" fill="white"/><circle cx="50" cy="36" r="2.5" fill="white"/><defs><linearGradient id="wg" x1="22" y1="23" x2="58" y2="57"><stop stop-color="#6C63FF"/><stop offset="1" stop-color="#3B82F6"/></linearGradient></defs></svg>
+          </div>
+          <h2>Welcome to ChatWave!</h2>
+          <p>Send a message in <strong>Global Chat</strong> or click on a user to start a <strong>private conversation</strong>.</p>
+          <div class="welcome-features">
+            <div class="welcome-feature"><span class="wf-icon">💬</span><span>Real-time messaging</span></div>
+            <div class="welcome-feature"><span class="wf-icon">🔒</span><span>Private chats</span></div>
+            <div class="welcome-feature"><span class="wf-icon">😍</span><span>Emoji reactions</span></div>
+            <div class="welcome-feature"><span class="wf-icon">📷</span><span>Image sharing</span></div>
+            <div class="welcome-feature"><span class="wf-icon">↩️</span><span>Reply to messages</span></div>
+            <div class="welcome-feature"><span class="wf-icon">🔍</span><span>Message search</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div id="messages" class="messages hidden"></div>
+
+      <!-- File drop zone overlay -->
+      <div id="drop-zone" class="drop-zone hidden">
+        <div class="drop-zone-content">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Drop image to send</p>
+        </div>
+      </div>
+
+      <!-- Scroll-to-bottom button -->
+      <button id="scroll-bottom-btn" class="scroll-bottom-btn hidden" aria-label="Scroll to latest message">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <span id="new-msg-count" class="new-msg-count hidden">0</span>
+      </button>
+
+      <!-- Reply bar (above input) -->
+      <div id="reply-bar" class="reply-bar hidden">
+        <div class="reply-bar-content">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+          <div class="reply-bar-info">
+            <span id="reply-author" class="reply-bar-author"></span>
+            <span id="reply-text" class="reply-bar-text"></span>
+          </div>
+        </div>
+        <button id="reply-cancel" class="reply-cancel" aria-label="Cancel reply">✕</button>
+      </div>
+
+      <!-- Image preview before send -->
+      <div id="image-preview-bar" class="image-preview-bar hidden">
+        <img id="image-preview-thumb" class="image-preview-thumb" alt="Preview" />
+        <span id="image-preview-name" class="image-preview-name"></span>
+        <button id="image-preview-cancel" class="image-preview-cancel" aria-label="Remove image">✕</button>
+      </div>
+
+      <!-- Input Bar -->
+      <form id="message-form" class="message-form" autocomplete="off">
+        <button type="button" id="emoji-btn" class="emoji-btn" aria-label="Emoji picker">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </button>
+        <label class="image-upload-btn" aria-label="Upload image" title="Share image">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <input type="file" id="image-input" accept="image/*" hidden />
+        </label>
+        <div class="message-input-wrap">
+          <input id="message-input" type="text" placeholder="Type a message…" maxlength="2000" autocomplete="off" />
+        </div>
+        <button type="submit" class="send-btn" id="send-btn" aria-label="Send message">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </form>
+    </main>
+
+    <!-- Emoji Picker -->
+    <div id="emoji-picker" class="emoji-picker hidden">
+      <div class="emoji-picker-header">
+        <div class="emoji-tabs" id="emoji-tabs">
+          <button class="emoji-tab active" data-category="smileys">😊</button>
+          <button class="emoji-tab" data-category="gestures">👍</button>
+          <button class="emoji-tab" data-category="hearts">❤️</button>
+          <button class="emoji-tab" data-category="animals">🐱</button>
+          <button class="emoji-tab" data-category="food">🍕</button>
+          <button class="emoji-tab" data-category="objects">⚡</button>
+          <button class="emoji-tab" data-category="symbols">✨</button>
+        </div>
+      </div>
+      <div class="emoji-grid" id="emoji-grid"></div>
+    </div>
+
+    <!-- Reaction picker (appears on message hover) -->
+    <div id="reaction-picker" class="reaction-picker hidden">
+      <button class="reaction-quick" data-emoji="👍">👍</button>
+      <button class="reaction-quick" data-emoji="❤️">❤️</button>
+      <button class="reaction-quick" data-emoji="😂">😂</button>
+      <button class="reaction-quick" data-emoji="😮">😮</button>
+      <button class="reaction-quick" data-emoji="😢">😢</button>
+      <button class="reaction-quick" data-emoji="🔥">🔥</button>
+      <button class="reaction-quick" data-emoji="👏">👏</button>
+      <button class="reaction-more" id="reaction-more-btn" title="More emoji">+</button>
+    </div>
+
+    <!-- Image Lightbox -->
+    <div id="lightbox" class="lightbox hidden">
+      <div class="lightbox-backdrop"></div>
+      <div class="lightbox-content">
+        <img id="lightbox-img" src="" alt="Full image" />
+        <button id="lightbox-close" class="lightbox-close" aria-label="Close">✕</button>
+      </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
