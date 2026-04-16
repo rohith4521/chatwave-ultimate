@@ -108,7 +108,6 @@
   let localStream = null;
   let activeCallUser = null;
   let isCallIncoming = false;
-  let iceCandidateQueue = [];
 
   const iceServers = {
     iceServers: [
@@ -318,15 +317,12 @@
     socket.on('webrtc-answer', async (data) => {
       if (rtcPeerConnection) {
         await rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-        processIceQueue();
       }
     });
 
     socket.on('webrtc-candidate', async (data) => {
-      if (rtcPeerConnection && rtcPeerConnection.remoteDescription && rtcPeerConnection.remoteDescription.type) {
-        try { await rtcPeerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(err){}
-      } else {
-        iceCandidateQueue.push(data.candidate);
+      if (rtcPeerConnection && data.candidate) {
+        await rtcPeerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
       }
     });
 
@@ -410,15 +406,6 @@
       const answer = await rtcPeerConnection.createAnswer();
       await rtcPeerConnection.setLocalDescription(answer);
       socket.emit('webrtc-answer', { target: activeCallUser, answer });
-      processIceQueue();
-    }
-  }
-
-  async function processIceQueue() {
-    if (!rtcPeerConnection) return;
-    while (iceCandidateQueue.length > 0) {
-      const candidate = iceCandidateQueue.shift();
-      try { await rtcPeerConnection.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e){}
     }
   }
 
@@ -427,7 +414,6 @@
     incCallModal.classList.add('hidden');
     isCallIncoming = false;
     activeCallUser = null;
-    iceCandidateQueue = [];
     
     if (localStream) {
       localStream.getTracks().forEach(t => t.stop());
@@ -556,7 +542,7 @@
     if (channel === 'global') {
       channelGlobal.classList.add('active');
       chatTitle.textContent = 'Global Chat';
-      welcomeScreen.style.display = (messageStore['global'] && messageStore['global'].length) ? 'none' : 'flex';
+      welcomeScreen.style.display = messageStore['global'].length ? 'none' : 'flex';
       callBtn.classList.add('hidden');
     } else {
       const uEl = document.querySelector(`.user-list li[data-username="${channel}"]`);
@@ -574,12 +560,7 @@
     unreadCounts[channel] = 0;
     updateUnreadBadges();
     
-    if (window.innerWidth <= 768) {
-      sidebar.classList.remove('open');
-      const so = document.getElementById('sidebar-overlay');
-      if (so) so.classList.remove('active');
-    }
-    
+    if (window.innerWidth <= 768) sidebar.classList.remove('open');
     renderMessages();
     markAsRead(channel);
     messageInput.focus();
@@ -953,8 +934,6 @@
     document.documentElement.setAttribute('data-theme', nt);
     localStorage.setItem('chatwave_theme', nt);
   };
-
-  channelGlobal.onclick = () => switchChannel('global');
 
   function playSound(type) {} // mocked
 

@@ -574,12 +574,7 @@
     unreadCounts[channel] = 0;
     updateUnreadBadges();
     
-    if (window.innerWidth <= 768) {
-      sidebar.classList.remove('open');
-      const so = document.getElementById('sidebar-overlay');
-      if (so) so.classList.remove('active');
-    }
-    
+    if (window.innerWidth <= 768) sidebar.classList.remove('open');
     renderMessages();
     markAsRead(channel);
     messageInput.focus();
@@ -953,8 +948,6 @@
     document.documentElement.setAttribute('data-theme', nt);
     localStorage.setItem('chatwave_theme', nt);
   };
-
-  channelGlobal.onclick = () => switchChannel('global');
 
   function playSound(type) {} // mocked
 

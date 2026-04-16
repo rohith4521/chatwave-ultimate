@@ -954,8 +954,6 @@
     localStorage.setItem('chatwave_theme', nt);
   };
 
-  channelGlobal.onclick = () => switchChannel('global');
-
   function playSound(type) {} // mocked
 
   // Typing logic

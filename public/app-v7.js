@@ -556,7 +556,7 @@
     if (channel === 'global') {
       channelGlobal.classList.add('active');
       chatTitle.textContent = 'Global Chat';
-      welcomeScreen.style.display = (messageStore['global'] && messageStore['global'].length) ? 'none' : 'flex';
+      welcomeScreen.style.display = messageStore['global'].length ? 'none' : 'flex';
       callBtn.classList.add('hidden');
     } else {
       const uEl = document.querySelector(`.user-list li[data-username="${channel}"]`);
@@ -574,12 +574,7 @@
     unreadCounts[channel] = 0;
     updateUnreadBadges();
     
-    if (window.innerWidth <= 768) {
-      sidebar.classList.remove('open');
-      const so = document.getElementById('sidebar-overlay');
-      if (so) so.classList.remove('active');
-    }
-    
+    if (window.innerWidth <= 768) sidebar.classList.remove('open');
     renderMessages();
     markAsRead(channel);
     messageInput.focus();
@@ -953,8 +948,6 @@
     document.documentElement.setAttribute('data-theme', nt);
     localStorage.setItem('chatwave_theme', nt);
   };
-
-  channelGlobal.onclick = () => switchChannel('global');
 
   function playSound(type) {} // mocked
 
